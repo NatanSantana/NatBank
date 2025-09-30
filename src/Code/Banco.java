@@ -1,4 +1,4 @@
-package entity;
+package Code;
 import DAO.ExtratosDAO;
 import DAO.UsuariosDAO;
 import tabelas.Extratos;
@@ -61,7 +61,7 @@ public class Banco {
 
             String cpfExiste = "";
 
-            cpfExiste = userDAO.getCpf(cpf);
+            cpfExiste = userDAO.resgatarCpf(cpf);
 
             if (cpf.length() == 11 && cpfExiste.isEmpty()) {
                 user.setCpf(cpf);
@@ -90,12 +90,12 @@ public class Banco {
             System.out.println("CPF da conta: ");
             String cpfDigitado = sc.nextLine();
 
-            if (cpfDigitado.equals(userDAO.getCpf(cpfDigitado))) {
+            if (cpfDigitado.equals(userDAO.resgatarCpf(cpfDigitado))) {
 
                 System.out.println("Senha da conta: ");
                 String senhaDigitada = sc.nextLine();
 
-                if (senhaDigitada.equals(userDAO.getSenha(cpfDigitado))) {
+                if (senhaDigitada.equals(userDAO.resgatarSenha(cpfDigitado))) {
                     contaLogada = cpfDigitado;
                     System.out.printf("---Bem Vindo ao NATBANK---\n Sr(a). %s%n", userDAO.resgatarNome(cpfDigitado));
 
@@ -190,7 +190,7 @@ public class Banco {
         System.out.println("Digite sua senha");
         String senha = sc.nextLine();
 
-        String senhaResgatada = userDAO.getSenha(cpf);
+        String senhaResgatada = userDAO.resgatarSenha(cpf);
 
         if (cpf.length() == 11 && Objects.equals(senha, senhaResgatada)) {
             userDAO.deletarConta(cpf);
@@ -214,7 +214,7 @@ public class Banco {
             System.out.println("Digite a senha da sua conta: ");
             String senha = sc.nextLine();
             String contaTerceiros = null;
-            if (senha.equals(userDAO.getSenha(contaLogada))) {
+            if (senha.equals(userDAO.resgatarSenha(contaLogada))) {
 
                 do {
                     try {
@@ -230,7 +230,7 @@ public class Banco {
                                 System.out.println("Digite o cpf da conta para qual você deseja transferir: ");
                                 contaTerceiros = sc.nextLine();
 
-                                String seExisteCpf = userDAO.getCpf(contaTerceiros);
+                                String seExisteCpf = userDAO.resgatarCpf(contaTerceiros);
 
 
                                 if (!seExisteCpf.isEmpty() && !seExisteCpf.equals(contaLogada)) {

@@ -1,4 +1,4 @@
-package entity;
+package Code;
 
 import java.util.Scanner;
 public class AppTeste {

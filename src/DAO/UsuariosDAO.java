@@ -114,7 +114,7 @@ public class UsuariosDAO extends Usuarios {
         return senha;
     }
 
-    public String resgatarCpf(String cpfDigitado) {
+    public String resgatarCpf (String cpfDigitado) {
         String sql  = "SELECT cpf FROM usuarios WHERE cpf = ?";
         PreparedStatement ps;
         String cpfResgatado = "";
