@@ -166,5 +166,4 @@ public class UsuariosDAO extends Usuarios {
         }
         return nomeResgatado;
     }
-
 }

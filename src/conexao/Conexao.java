@@ -21,7 +21,4 @@ public class Conexao {
             return conn;
         }
     }
-
-
-
 }

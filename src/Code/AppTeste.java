@@ -6,8 +6,10 @@ public class AppTeste {
         Banco banco = new Banco();
         Scanner sc = new Scanner(System.in);
 
+
+
         do {
-            System.out.println("---BEM-VINDO AO NATBANK---" + "\nSaldo: " + "R$" + banco.resgatarSaldo() + "\n[1] Criar Conta\n[2] Depositar Dinheiro\n[3] Sacar Dinheiro\n[4] Transferir Dinheiro Para Outra Conta\n[5] Deletar Conta\n[6] Entrar em uma Conta\n[7] Sair da Conta\n[8] Extrato");
+            System.out.println("---BEM-VINDO AO NATBANK---" + "\nSaldo: " + "R$" + banco.resgatarSaldo() + "\n[1] Criar Conta\n[2] Depositar Dinheiro\n[3] Sacar Dinheiro\n[4] Transferir Dinheiro Para Outra Conta\n[5] Deletar Conta\n[6] Entrar em uma Conta\n[7] Sair da Conta\n[8] Extrato\n[9] Pedir Empréstimo\n[10] Pagar Parcelas");
 
 
             String opcao = sc.nextLine();
@@ -43,6 +45,12 @@ public class AppTeste {
                 case "8":
                     System.out.println("---Extrato---");
                     banco.extrato();
+                    break;
+                case "9":
+                    banco.solicitarEmprestimo();
+                    break;
+                case "10":
+                    banco.pagarEmprestimo();
                     break;
             }
         } while (true);

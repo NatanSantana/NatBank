@@ -1,6 +1,8 @@
 package Code;
+import DAO.EmprestimosDAO;
 import DAO.ExtratosDAO;
 import DAO.UsuariosDAO;
+import tabelas.Emprestimos;
 import tabelas.Extratos;
 import tabelas.Usuarios;
 
@@ -8,13 +10,17 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class Banco {
-    private String cpfDigitado;
-    private String contaLogada = "";
 
+
+
+    protected String contaLogada = "";
+    protected final double juros = 0.05;
     private final Usuarios user = new Usuarios();
     private final UsuariosDAO userDAO = new UsuariosDAO();
     private final ExtratosDAO extratoDAO = new ExtratosDAO();
     private final Extratos extrato = new Extratos();
+    private final Emprestimos empres = new Emprestimos();
+    private final EmprestimosDAO empresDAO = new EmprestimosDAO();
     Scanner sc = new Scanner(System.in);
 
 
@@ -59,9 +65,9 @@ public class Banco {
             String cpf = sc.nextLine();
             System.out.println("------------------");
 
-            String cpfExiste = "";
 
-            cpfExiste = userDAO.resgatarCpf(cpf);
+
+            String cpfExiste = userDAO.resgatarCpf(cpf);
 
             if (cpf.length() == 11 && cpfExiste.isEmpty()) {
                 user.setCpf(cpf);
@@ -133,7 +139,7 @@ public class Banco {
                         break;
 
                     } else {
-                        System.out.println("Insira um valor positivo");
+                        System.out.println("Insira um valorSolicitado positivo");
                     }
 
                 } catch (NumberFormatException e) {
@@ -148,7 +154,7 @@ public class Banco {
 
     public void sacar () {
         if (!contaLogada.isEmpty()) {
-            double saldoResgatado = 0;
+            double saldoResgatado;
 
             do {
                 try {
@@ -197,7 +203,7 @@ public class Banco {
         } else if (cpf.length() != 11){
             System.out.println("------------------");
             System.out.println("Insira um formato válido de cpf");
-        } else if (!Objects.equals(senha, senhaResgatada)) {
+        } else {
             System.out.println("------------------");
             System.out.println("Senha Incorreta ou CPF Incorreto");
         }
@@ -209,11 +215,11 @@ public class Banco {
     public void transferirDinheiro() {
         if (!contaLogada.isEmpty()) {
 
-            double valorTransferir = 0;
+            double valorTransferir;
             System.out.println("------------------");
             System.out.println("Digite a senha da sua conta: ");
             String senha = sc.nextLine();
-            String contaTerceiros = null;
+            String contaTerceiros;
             if (senha.equals(userDAO.resgatarSenha(contaLogada))) {
 
                 do {
@@ -307,5 +313,146 @@ public class Banco {
         extratoDAO.extrato(contaLogada);
 
     }
-}
 
+    public void solicitarEmprestimo() {
+
+        Scanner sc = new Scanner(System.in);
+
+        if (!contaLogada.isEmpty()) {
+            do {
+                try {
+                    System.out.println("Qual o Valor do Empréstimo? (VALOR MÁXIMO: 100.000)");
+                    float valorSolicitado = (Integer.parseInt(sc.nextLine()));
+
+                    if (valorSolicitado <= 0 || valorSolicitado > 100000) {
+                        System.out.println("É VÁLIDO APENAS VALORES MAIORES DO QUE 100 E MENORES QUE 100.000");
+
+                    } else {
+                        System.out.println("Deseja Parcelar em Quantos meses?\n3x\n6x\n12x");
+                        int meses = (Integer.parseInt(sc.nextLine()));
+
+                        if (meses == 3 || meses == 6 || meses == 12) {
+
+                            float jurosSomado = (float) (1 + juros);
+                            float potenciacaoNegativa = (float) Math.pow(jurosSomado, -meses);
+                            float divisor = 1 - (potenciacaoNegativa);
+                            float pmt = (float) ((valorSolicitado * juros) / divisor);
+                            float montanteFinal = pmt * meses;
+
+                            System.out.printf("Valor do Empréstimo: R$%.2f%n", valorSolicitado);
+                            int porcentagem = (int) (juros * 100);
+                            System.out.printf("Juros: %s%%\n", porcentagem);
+                            System.out.printf("Parcelas: R$%.2f%n", pmt);
+                            System.out.printf("Meses: %s%n", meses);
+                            System.out.printf("Total a Pagar: R$%.2f%n", montanteFinal);
+
+                            System.out.println("CONFIRME O EMPRÉSTIMO:\nSIM OU NÃO?");
+                            String confirmacao = sc.nextLine();
+
+                            if (confirmacao.equalsIgnoreCase("sim")) {
+                                System.out.println("---EMPRÉSTIMO REALIZADO---");
+                                userDAO.alterarSaldo(contaLogada, resgatarSaldo() + valorSolicitado);
+                                empres.setCpfUsuario(contaLogada);
+                                empres.setValorEmprestado(valorSolicitado);
+                                empres.setMontanteFinal(montanteFinal);
+                                empres.setParcelas(meses);
+                                empres.setValorParcelas(pmt);
+                                empres.setValorRestante(montanteFinal);
+                                empresDAO.cadastrarEmprestimos(empres);
+
+                                extratoDAO.setCpf(contaLogada);
+                                extratoDAO.setAto("Emprestado");
+                                extratoDAO.setDinheiro(valorSolicitado);
+                                extratoDAO.inserirDados(extratoDAO);
+
+                            } else {
+                                System.out.println("---Empréstimo Cancelado---");
+                            }
+                            break;
+                        } else {
+                            System.out.println("Selecione uma opção válida de parcelas");
+                        }
+                    }
+                } catch (java.lang.NumberFormatException e) {
+                    System.out.println("Insira apenas números");
+                }
+            } while (true);
+
+            } else {
+            System.out.println("Entre em uma conta primeiramente!");
+        }
+    }
+
+    public void pagarEmprestimo(){
+        if (!contaLogada.isEmpty()) {
+            do {
+                if (empresDAO.resgatarNumeroParcelas(contaLogada) != 0) {
+                    System.out.println("---PARCELAS---");
+                    for (int i = 1; i <= empresDAO.resgatarNumeroParcelas(contaLogada); i++) {
+                        System.out.printf(i + "º Parcela: R$%.2f%n", empresDAO.resgatarValorParcela(contaLogada));
+                    }
+                    System.out.println("Deseja Realizar Pagamento? (sim ou não)");
+                    String confirmacao = sc.nextLine();
+
+                    if (confirmacao.equalsIgnoreCase("sim")) {
+                        System.out.println("Deseja Pagar Quantas Parcelas?");
+                        int quantasParcelas = Integer.parseInt(sc.nextLine());
+
+                        if (quantasParcelas <= empresDAO.resgatarNumeroParcelas(contaLogada)) {
+
+                            float valorPagar = empresDAO.resgatarValorParcela(contaLogada) * quantasParcelas;
+
+                            System.out.printf("Total: " + "R$%.2f%n", valorPagar);
+
+                            System.out.println("Confirmar Pagamento?");
+                            String confirmarPagamento = sc.nextLine();
+
+                            if (confirmarPagamento.equalsIgnoreCase("sim") && resgatarSaldo() >= valorPagar) {
+                                double saldoSubtraido = resgatarSaldo() - valorPagar;
+                                userDAO.alterarSaldo(contaLogada, saldoSubtraido);
+                                System.out.println("---Pagamento Realizado---");
+
+                                extrato.setCpf(contaLogada);
+                                extrato.setAto("Parcelas Pagas: " + quantasParcelas);
+                                extrato.setDinheiro(valorPagar);
+                                extratoDAO.inserirDados(extrato);
+
+                                int qtdeParcelas = empresDAO.resgatarNumeroParcelas(contaLogada) - quantasParcelas;
+                                double valorRestante = empresDAO.resgatarValorRestante(contaLogada) - valorPagar;
+
+
+                                empresDAO.alterarNumeroParcelas(contaLogada, qtdeParcelas);
+                                empresDAO.alterarvalorRestante(contaLogada, valorRestante);
+                                System.out.println(qtdeParcelas + " Parcelas Restatante(s)");
+
+                                if (empresDAO.resgatarNumeroParcelas(contaLogada) == 0) {
+                                    System.out.println("Empréstimo Quitado Com Sucesso");
+                                    empresDAO.deletarEmprestimo(contaLogada);
+
+                                    extrato.setCpf(contaLogada);
+                                    extrato.setAto("Empréstimo Quitado");
+                                    extrato.setDinheiro(extratoDAO.valorEmprestado(contaLogada, "Emprestado"));
+                                    extratoDAO.inserirDados(extrato);
+                                }
+
+                            } else {
+                                System.out.println("Operação Cancelada");
+                            }
+                            break;
+
+                        } else {
+                            System.out.println("O número de parcelas inserido deve ser menor ou igual ao número de parcelas existentes");
+                        }
+                    } else {
+                        System.out.println("Insira um valor válido (sim ou não)");
+                    }
+
+                } else {
+                    System.out.println("Você Não Tem Um Empréstimo Ativo Para Pagar Parcelas");
+                    break;
+                }
+            } while (true);
+
+        }
+    }
+}

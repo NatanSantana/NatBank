@@ -59,7 +59,36 @@ public class ExtratosDAO extends Extratos {
             throw new RuntimeException(e);
         }
         return infoExtrato;
-
     }
+
+    public float valorEmprestado(String cpf, String emprestado) {
+        String sql = "SELECT dinheiro FROM extratos WHERE cpf = ? AND ato = ?";
+        PreparedStatement ps;
+        float dinheiroResgatado = 0.0F;
+
+        try {
+            ps = Conexao.getConexao().prepareStatement(sql);
+            ps.setString(1,cpf);
+            ps.setString(2, emprestado);
+
+
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                dinheiroResgatado = rs.getFloat("dinheiro");
+            }
+            rs.close();
+            ps.close();
+
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return dinheiroResgatado;
+    }
+
+
 
 }
