@@ -6,11 +6,13 @@ import tabelas.Emprestimos;
 import tabelas.Extratos;
 import tabelas.Usuarios;
 
+import java.sql.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Scanner;
+import java.time.*;
 
 public class Banco {
-
 
 
     protected String contaLogada = "";
@@ -135,11 +137,12 @@ public class Banco {
                         extrato.setCpf(contaLogada);
                         extrato.setAto("Depositado");
                         extrato.setDinheiro(valor);
+                        extrato.setDataHora(String.valueOf(LocalDateTime.now()));
                         new ExtratosDAO().inserirDados(extrato);
                         break;
 
                     } else {
-                        System.out.println("Insira um valorSolicitado positivo");
+                        System.out.println("Insira um valor positivo");
                     }
 
                 } catch (NumberFormatException e) {
@@ -169,6 +172,7 @@ public class Banco {
                         extrato.setCpf(contaLogada);
                         extrato.setAto("Sacado");
                         extrato.setDinheiro(valorSaque);
+                        extrato.setDataHora(String.valueOf(LocalDateTime.now()));
                         new ExtratosDAO().inserirDados(extrato);
                         break;
 
@@ -258,6 +262,7 @@ public class Banco {
                                     extrato.setAto("Transferido");
                                     extrato.setDinheiro(valorTransferir);
                                     extrato.setCpf_terceiro("Mandou");
+                                    extrato.setDataHora(String.valueOf(LocalDateTime.now()));
                                     new ExtratosDAO().inserirDados(extrato);
                                     //
 
@@ -360,10 +365,11 @@ public class Banco {
                                 empres.setValorRestante(montanteFinal);
                                 empresDAO.cadastrarEmprestimos(empres);
 
-                                extratoDAO.setCpf(contaLogada);
-                                extratoDAO.setAto("Emprestado");
-                                extratoDAO.setDinheiro(valorSolicitado);
-                                extratoDAO.inserirDados(extratoDAO);
+                                extrato.setCpf(contaLogada);
+                                extrato.setAto("Emprestado");
+                                extrato.setDinheiro(valorSolicitado);
+                                extrato.setDataHora(String.valueOf(LocalDateTime.now()));
+                                extratoDAO.inserirDados(extrato);
 
                             } else {
                                 System.out.println("---Empréstimo Cancelado---");
@@ -413,8 +419,9 @@ public class Banco {
                                 System.out.println("---Pagamento Realizado---");
 
                                 extrato.setCpf(contaLogada);
-                                extrato.setAto("Parcelas Pagas: " + quantasParcelas);
+                                extrato.setAto(quantasParcelas + " Parcelas Pagas");
                                 extrato.setDinheiro(valorPagar);
+                                extrato.setDataHora(String.valueOf(LocalDateTime.now()));
                                 extratoDAO.inserirDados(extrato);
 
                                 int qtdeParcelas = empresDAO.resgatarNumeroParcelas(contaLogada) - quantasParcelas;
@@ -432,6 +439,7 @@ public class Banco {
                                     extrato.setCpf(contaLogada);
                                     extrato.setAto("Empréstimo Quitado");
                                     extrato.setDinheiro(extratoDAO.valorEmprestado(contaLogada, "Emprestado"));
+                                    extrato.setDataHora(String.valueOf(LocalDateTime.now()));
                                     extratoDAO.inserirDados(extrato);
                                 }
 

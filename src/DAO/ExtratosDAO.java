@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class ExtratosDAO extends Extratos {
     public void inserirDados(Extratos extratos) {
-        String sql = "INSERT INTO extratos (cpf, ato, dinheiro, cpf_terceiro) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO extratos (cpf, ato, dinheiro, cpf_terceiro, dataHora) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps;
 
         try {
@@ -19,6 +19,7 @@ public class ExtratosDAO extends Extratos {
             ps.setString(2, extratos.getAto());
             ps.setDouble(3, extratos.getDinheiro());
             ps.setString(4, extratos.getCpf_terceiro());
+            ps.setString(5, extratos.getDataHora());
 
             ps.execute();
             ps.close();
@@ -29,11 +30,12 @@ public class ExtratosDAO extends Extratos {
     }
 
     public Object extrato(String cpfDigitado) {
-        String sql = "SELECT ato, dinheiro FROM extratos WHERE cpf = ?";
+        String sql = "SELECT ato, dinheiro, dataHora FROM extratos WHERE cpf = ?";
         PreparedStatement ps;
         ArrayList<Object> infoExtrato = new ArrayList<>();
         String ato;
         double dinheiro;
+        String tempo;
 
         try {
             ps = Conexao.getConexao().prepareStatement(sql);
@@ -44,7 +46,9 @@ public class ExtratosDAO extends Extratos {
             while (rs.next()) {
                 ato = rs.getString("ato");
                 dinheiro = rs.getDouble("dinheiro");
-                infoExtrato.add(ato + ": "+ "R$" + dinheiro);
+                tempo = rs.getString("dataHora");
+                infoExtrato.add(ato + ": "+ "R$" + dinheiro + " " + tempo);
+
             }
 
             System.out.println("----------");

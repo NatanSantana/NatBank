@@ -1,9 +1,12 @@
 package tabelas;
 
+import java.util.Date;
+
 public class Extratos {
     protected String cpf, cpf_terceiro;
     protected String ato;
     protected double dinheiro;
+    protected String dataHora;
 
     public String getCpf_terceiro() {
         return cpf_terceiro;
@@ -35,5 +38,13 @@ public class Extratos {
 
     public void setDinheiro(double dinheiro) {
         this.dinheiro = dinheiro;
+    }
+
+    public String getDataHora() {
+        return dataHora;
+    }
+
+    public void setDataHora(String dataHora) {
+        this.dataHora = dataHora;
     }
 }
